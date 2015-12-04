@@ -3,6 +3,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <err.h>
+#include <string.h>
+
+#define BYTE 1
+
+int bits = 0, width = 0, height = 0;
 
 using namespace std;
 
@@ -53,52 +58,52 @@ vector<vector<string>> generate_blocks(vector<string> lines)
 	return blocks;
 }
 
+string read_line(FILE* file)
+{
+	if (feof(file))
+		return "";
+
+	char c = fgetc(file);
+
+	string result = "";
+	result += c;
+
+	for (int i = 1; i < width; ++i)
+	{
+		c = fgetc(file);
+		if (not feof(file))
+			result += c;
+		else
+			break;
+
+	}
+	
+	return result;
+}
+
 void read_image()
 {
 	FILE* image_file = fopen("test.y", "r");
 
-	int file_size = get_file_size(image_file);
-  	char *line_readed = (char *) malloc(sizeof(char) * (file_size + 1));
-  	fpos_t file_position;
-  	long position = 0;
-
-  	while (position < file_size)
-  	{
-  		vector<string> lines(3);
-  		bool valid = true;
-  		
-  		for (int i = 0; i < 3; ++i)
-  		{
-  			fgets(line_readed, file_size, image_file);
-  			lines[i] = line_readed;
-  			lines[i].pop_back();
-
-  			fgetpos(image_file, &file_position);
-  			position = file_position.__pos;
-
-  			if (position >= file_size and i < 2)
-  			{
-  				valid = false;
-  				break;
-  			}
-  		}
-
-		if (valid)
-	  		cout << generate_blocks(lines).size() << endl;
-  	}
+	vector<string> lines(3);
+	lines[0] = read_line(image_file);
+	lines[1] = read_line(image_file);
+	lines[2] = read_line(image_file);
 
   	fclose(image_file);
 }
 
 int main(int argc, char const *argv[])
 {
-	if (argc < 2)
+	if (argc < 4)
 		errx(-1, "Invalid number of params!");
 
 	string key = load_key();
 	int key_position = 0, file_position = 0;
 
-	int bits = atoi(argv[1]);
+	bits = atoi(argv[1]);
+	width = atoi(argv[2]);
+	height = atoi(argv[3]);
 
 	read_image();
 
