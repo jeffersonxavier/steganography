@@ -30,10 +30,13 @@ string load_key()
 	int file_size = get_file_size(key_file);
   	char *key = (char *) malloc(sizeof(char) * (file_size + 1));
 
-  	fscanf(key_file, "%s", key);
+  	fgets(key, file_size, key_file);
+  	string result = key;
+
+  	free(key);
   	fclose(key_file);
 
-  	return key;
+  	return result;
 }
 
 vector<vector<string>> generate_blocks(vector<string> lines)
@@ -83,12 +86,15 @@ string read_line(FILE* file)
 
 void read_image()
 {
-	FILE* image_file = fopen("test.y", "r");
+	FILE* image_file = fopen("image.y", "r");
 
-	vector<string> lines(3);
-	lines[0] = read_line(image_file);
-	lines[1] = read_line(image_file);
-	lines[2] = read_line(image_file);
+	for (int i = 0; i < height; i+=3)
+	{
+		vector<string> lines(3);
+		lines[0] = read_line(image_file);
+		lines[1] = read_line(image_file);
+		lines[2] = read_line(image_file);
+	}
 
   	fclose(image_file);
 }
