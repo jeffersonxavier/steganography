@@ -116,7 +116,6 @@ void get_byte(int column_block)
 	set_position(line, column);
 	
 	char byte = fgetc(image_file);
-	cout << "byte: " << byte << endl;
 	get_bits(byte);
 }
 
@@ -131,7 +130,7 @@ int main(int argc, char const *argv[])
 	width = atoi(argv[2]);
 	height = atoi(argv[3]);
 
-	image_file = fopen("test.y", "r");
+	image_file = fopen("image.y", "r");
 	out_file = fopen("out.y", "w+");
 
 	if (not image_file or not out_file)
