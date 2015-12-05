@@ -1,14 +1,17 @@
 #include <iostream>
+#include <vector>
 #include <cstdio>
 #include <cstdlib>
 #include <err.h>
 #include <string.h>
+#include <limits.h>
 
 using namespace std;
 
-int bits = 0, width = 0, height = 0, line_block = 0, key_position = 0, key_size = 0;
+int bits_number = 0, width = 0, height = 0, line_block = 0, key_position = 0, key_size = 0;
 string key;
-FILE* image_file;
+vector<int> bits;
+FILE *image_file, *out_file;
 
 int get_file_size(FILE* file)
 {
@@ -44,6 +47,51 @@ void set_position(int line, int column)
 	fseek(image_file, position, SEEK_SET);
 }
 
+char transform_to_byte()
+{
+	unsigned char byte = 0x00;
+
+	for (int i = 7, j = 0; i >= 0; --i, ++j)
+    {
+    	if (bits[j] == 1)
+    	{
+	    	byte = (byte >> i) | 0x01;
+	    	byte <<= i;
+    	}
+    }
+
+    return byte;
+}
+
+void complet_bits()
+{
+	int size_to_move = CHAR_BIT - bits.size();
+
+	for (int i = 0; i < bits.size() - CHAR_BIT; ++i)
+		bits.push_back(0);
+
+	char byte = transform_to_byte();
+	byte >>= size_to_move;
+	fprintf(out_file, "%c", byte);
+}
+
+void get_bits(char byte)
+{
+	for (int i = (bits_number - 1), j = 0; i >= 0; --i, ++j)
+	{
+		int bit = (byte >> i) & 0x01;
+		bits.push_back(bit);
+
+		if (bits.size() == CHAR_BIT)
+		{
+			char byte = transform_to_byte();
+			fprintf(out_file, "%c", byte);
+
+			bits.clear();
+		}
+	}
+}
+
 void get_byte(int column_block)
 {
 	int byte_position = key[key_position] - '0';
@@ -69,6 +117,7 @@ void get_byte(int column_block)
 	
 	char byte = fgetc(image_file);
 	cout << "byte: " << byte << endl;
+	get_bits(byte);
 }
 
 int main(int argc, char const *argv[])
@@ -78,13 +127,15 @@ int main(int argc, char const *argv[])
 
 	key = load_key();
 
-	bits = atoi(argv[1]);
+	bits_number = atoi(argv[1]);
 	width = atoi(argv[2]);
 	height = atoi(argv[3]);
 
 	image_file = fopen("test.y", "r");
-	if (not image_file)
-		errx(-1, "Fail in open image file!");
+	out_file = fopen("out.y", "w+");
+
+	if (not image_file or not out_file)
+		errx(-1, "Fail in open files!");
 
 	while (line_block < height / 3)
 	{
@@ -96,7 +147,11 @@ int main(int argc, char const *argv[])
 		line_block++;
 	}
 
+	if (not bits.empty())
+		complet_bits();
+
 	fclose(image_file);
+	fclose(out_file);
 
 	return 0;
 }
