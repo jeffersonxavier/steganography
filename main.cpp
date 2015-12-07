@@ -65,19 +65,16 @@ char transform_to_byte()
 
 void complet_bits()
 {
-	int size_to_move = CHAR_BIT - bits.size();
-
-	for (int i = 0; i < bits.size() - CHAR_BIT; ++i)
+	for (int i = 0; i < CHAR_BIT - bits.size(); ++i)
 		bits.push_back(0);
 
 	char byte = transform_to_byte();
-	byte >>= size_to_move;
 	fprintf(out_file, "%c", byte);
 }
 
 void get_bits(char byte)
 {
-	for (int i = (bits_number - 1), j = 0; i >= 0; --i, ++j)
+	for (int i = 0; i < bits_number; ++i)
 	{
 		int bit = (byte >> i) & 0x01;
 		bits.push_back(bit);
