@@ -8,9 +8,10 @@
 
 using namespace std;
 
-int bits_number = 0, width = 0, height = 0, line_block = 0, key_position = 0, key_size = 0;
+int bits_number = 0, line_block = 0, key_position = 0, key_size = 0, bytes = 0;
+int width = 0, height = 0, width_final = 0, height_final = 0;
 string key;
-vector<int> bits;
+vector<int> bits(CHAR_BIT, 0);
 FILE *image_file, *out_file;
 
 int get_file_size(FILE* file)
@@ -63,30 +64,17 @@ char transform_to_byte()
     return byte;
 }
 
-void complet_bits()
-{
-	for (int i = 0; i < CHAR_BIT - bits.size(); ++i)
-		bits.push_back(0);
-
-	char byte = transform_to_byte();
-	fprintf(out_file, "%c", byte);
-}
-
 void get_bits(char byte)
 {
+	if (bytes >= (width_final * height_final))
+		return;
+
 	for (int i = 0; i < bits_number; ++i)
-	{
-		int bit = (byte >> i) & 0x01;
-		bits.push_back(bit);
+		bits[i] = (byte >> i) & 0x01;
 
-		if (bits.size() == CHAR_BIT)
-		{
-			char byte = transform_to_byte();
-			fprintf(out_file, "%c", byte);
-
-			bits.clear();
-		}
-	}
+	char result_byte = transform_to_byte();
+	fprintf(out_file, "%c", result_byte);
+	bytes++;
 }
 
 void get_byte(int column_block)
@@ -118,14 +106,16 @@ void get_byte(int column_block)
 
 int main(int argc, char const *argv[])
 {
-	if (argc < 4)
-		errx(-1, "Invalid number of params!");
+	if (argc < 6)
+		errx(-1, "Usage: <bits> <width> <height> <width_final> <height_final>");
 
 	key = load_key();
 
 	bits_number = atoi(argv[1]);
 	width = atoi(argv[2]);
 	height = atoi(argv[3]);
+	width_final = atoi(argv[4]);
+	height_final = atoi(argv[5]);
 
 	image_file = fopen("image.y", "r");
 	out_file = fopen("out.y", "w+");
@@ -142,9 +132,6 @@ int main(int argc, char const *argv[])
 
 		line_block++;
 	}
-
-	if (not bits.empty())
-		complet_bits();
 
 	fclose(image_file);
 	fclose(out_file);
