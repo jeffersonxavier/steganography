@@ -11,8 +11,8 @@ using namespace std;
 #define HASH_SIZE 128
 
 int bits_number = 0, line_block = 0, key_position = 0, key_size = 0, bytes = 0;
-int width = 0, height = 0, width_final = 0, height_final = 0;
 string key;
+int width = 0, height = 0, width_final = 0, height_final = 0;
 vector<int> bits(CHAR_BIT, 0);
 vector<int> hash_bits;
 FILE *image_file, *out_file, *hash_file;
@@ -80,6 +80,16 @@ char write_byte(FILE *file, vector<int> bits_found)
 	bytes++;	
 }
 
+char byte_to_write()
+{
+	vector<int> byte(CHAR_BIT, 0);
+
+	for (int i = 0; i < (CHAR_BIT - bits_number); ++i)
+		byte[i] = 1;
+
+	return transform_to_byte(byte);
+}
+
 void get_bits(char byte)
 {
 	for (int i = 0; i < bits_number; ++i)
@@ -118,6 +128,13 @@ void get_byte(int column_block, string type)
 	else
 	{
 		get_hash_bits(byte);
+
+		int position = ftell(image_file);
+		char new_byte = byte & byte_to_write();
+
+		fseek(image_file, position-1, SEEK_SET);
+		fwrite(&new_byte, sizeof(char), sizeof(char), image_file);
+		fseek(image_file, position, SEEK_SET);
 	}
 }
 
@@ -134,8 +151,8 @@ int main(int argc, char const *argv[])
 	width_final = atoi(argv[4]);
 	height_final = atoi(argv[5]);
 
-	image_file = fopen("image.y", "r");
-	out_file = fopen("out.y", "w");
+	image_file = fopen("image.y", "r+b");
+	out_file = fopen("out.y", "w+");
 	hash_file = fopen("hash.txt", "w+");
 
 	if (not image_file or not out_file or not hash_file)
