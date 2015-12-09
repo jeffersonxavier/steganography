@@ -1,10 +1,11 @@
-#include <iostream>
-#include <vector>
 #include <cstdio>
 #include <cstdlib>
 #include <err.h>
-#include <string.h>
+#include <iostream>
 #include <limits.h>
+#include <openssl/md5.h>
+#include <string.h>
+#include <vector>
 
 using namespace std;
 
@@ -82,12 +83,10 @@ char write_byte(FILE *file, vector<int> bits_found)
 
 char byte_to_write()
 {
-	vector<int> byte(CHAR_BIT, 0);
+	char byte = 0xFF;
+	byte <<= bits_number;
 
-	for (int i = 0; i < (CHAR_BIT - bits_number); ++i)
-		byte[i] = 1;
-
-	return transform_to_byte(byte);
+	return byte;
 }
 
 void get_bits(char byte)
@@ -138,6 +137,31 @@ void get_byte(int column_block, string type)
 	}
 }
 
+void generate_md5()
+{
+	unsigned char hash[MD5_DIGEST_LENGTH];
+	FILE *image = fopen ("image.y", "rb");
+
+	if (not image)
+		errx(-1, "Fail in open image!");
+
+	MD5_CTX md5_context;
+    MD5_Init (&md5_context);
+
+    char c = fgetc(image);
+    while (c != EOF)
+    {
+        MD5_Update (&md5_context, &c, sizeof(c));
+        c = fgetc(image);
+    }
+    MD5_Final (hash, &md5_context);
+
+    for(int i = 0; i < MD5_DIGEST_LENGTH; i++) printf("%02x", hash[i]);
+    printf("\n");
+
+    fclose (image);
+}
+
 int main(int argc, char const *argv[])
 {
 	if (argc < 6)
@@ -182,6 +206,8 @@ int main(int argc, char const *argv[])
 
 	fclose(image_file);
 	fclose(out_file);
+
+	generate_md5();
 
 	return 0;
 }
