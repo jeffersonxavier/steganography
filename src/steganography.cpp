@@ -39,6 +39,8 @@ Steganography::extract_image()
 	int hash_size = HASH_SIZE / 8;
 	bool hash_mode = false;
 	
+	fprintf(m_out_file, "P5 %d %d 255 ", m_width_final, m_height_final);
+	
 	while (m_bytes < (m_width_final * m_height_final) + hash_size)
 	{
 		for (int i = 0; i < m_width / 3; ++i)
