@@ -1,4 +1,5 @@
 #include "connection.h"
+#include "steganography.h"
 #include <arpa/inet.h>
 #include <err.h>
 #include <netdb.h>
@@ -8,13 +9,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define ERROR_SOCKET -2
-#define ERROR_CONNECT -3
-#define ERROR_RECV -4
-#define ERROR_SEND -5
-
-using std::cerr;
-using std::endl;
+#define SIZE_TO_READ 4096
 
 //Init server ip, server port and socket descriptor
 Connection::Connection(string server_ip, int server_port)
@@ -24,6 +19,30 @@ Connection::Connection(string server_ip, int server_port)
 
 //Close socket
 Connection::~Connection()
+{
+	close_connection();
+}
+
+void
+Connection::send_image()
+{
+	FILE *out_file = fopen("out.y", "r");
+	if (not out_file)
+		errx(-1, "Error in open out file");
+
+	char buffer[SIZE_TO_READ];
+	int bytes = 0;
+
+	while ((bytes = fread(buffer, sizeof(char), SIZE_TO_READ, out_file)))
+	{
+		client_connection();
+		send_message(socket_descriptor, bytes, buffer);
+		close_connection();
+	}
+}
+
+void
+Connection::close_connection()
 {
 	if (socket_descriptor)
 		close(socket_descriptor);
@@ -36,7 +55,7 @@ Connection::do_connect(struct sockaddr_in* server_addr)
 	int descriptor = socket(AF_INET, SOCK_STREAM, 0);
 
 	if (descriptor == -1)
-		errx(ERROR_SOCKET, "Fail in socket function!");
+		errx(-1, "Fail in socket function!");
 
 	bzero((char *) server_addr, sizeof(*server_addr));
 
@@ -55,20 +74,18 @@ Connection::client_connection()
 	socket_descriptor = do_connect(&server_addr);
 
     if (connect(socket_descriptor,(struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
-		errx(ERROR_CONNECT, "Fail in connect function!");
-
-	printf("Connection success\n");
+		errx(-1, "Fail in connect function!");
 }
 
 //Send server message
 void
-Connection::send_message(int id, int size, string message)
+Connection::send_message(int id, int size, char* message)
 {
 	if (send(id, &size, sizeof(size), 0) < 0)
-		errx(ERROR_SEND, "Fail in send function!");
+		errx(-1, "Fail in send function!");
 
-	if (send(id, message.c_str(), size, 0) < 0)
-		errx(ERROR_SEND, "Fail in send function!");
+	if (send(id, message, size, 0) < 0)
+		errx(-1, "Fail in send function!");
 }
 
 //Receive server message and return this message
@@ -77,12 +94,12 @@ Connection::receive_message(int id)
 {
 	int size;
 	if (recv(id, &size, sizeof(size), 0) <= 0)
-		errx(ERROR_RECV, "Fail in first recv function!");
+		errx(-1, "Fail in first recv function!");
 
 	char* message = (char*) malloc(size);
 
 	if (recv(id, message, size, 0) <= 0)
-		errx(ERROR_RECV, "Fail in second recv function!");
+		errx(-1, "Fail in second recv function!");
 
 	string result = message;
 	free(message);

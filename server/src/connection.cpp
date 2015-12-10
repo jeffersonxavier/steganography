@@ -71,7 +71,7 @@ Connection::accept_connections()
 			client_ip = inet_ntoa(client.sin_addr);
 			printf("Connection success to client %s\n", client_ip.c_str());
 
-			receive_messages(client_id);
+			receive_image(client_id);
 		}
 
 		close(client_id);
@@ -79,17 +79,7 @@ Connection::accept_connections()
 }
 
 void
-Connection::send_message(int id, int size, string message)
-{
-	if (send(id, &size, sizeof(size), 0) < 0)
-		return;
-
-	if (send(id, message.c_str(), size, 0) < 0)
-		printf("Fail in send message %s\n", message.c_str());
-}
-
-void
-Connection::receive_messages(int id)
+Connection::receive_image(int id)
 {
 	int size;
 	if (recv(id, &size, sizeof(size), 0) <= 0)
@@ -100,5 +90,14 @@ Connection::receive_messages(int id)
 	if (recv(id, message, size, 0) <= 0)
 		printf("Fail in receive message from client %s\n", client_ip.c_str());
 
+	printf("Message received with %d bytes\n", size);
+
+	FILE *out_file = fopen("out.y", "a+");
+	if (not out_file)
+		errx(-1, "Error in open out file!");
+
+	fwrite(message, sizeof(char), size, out_file);
+	fclose(out_file);
+	
 	free(message);
 }

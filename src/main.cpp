@@ -16,7 +16,7 @@ int main(int argc, char const *argv[])
 		printf("Valid Image!\n");
 
 		Connection connection(SERVER_IP, SERVER_PORT);
-		connection.client_connection();
+		connection.send_image();
 	}
 
 	return 0;

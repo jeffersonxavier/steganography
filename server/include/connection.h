@@ -12,9 +12,6 @@ public:
 
 	void server_connection();
 	void accept_connections();
-	void receive_messages(int client_id);
-	
-	void send_message(int id, int size, string message);
 
 private:
 	string server_ip;
@@ -24,5 +21,8 @@ private:
 	float temperature;
 	bool status_air;
 
+	FILE *out_file;
+
 	int do_connect(struct sockaddr_in* server_addr);
+	void receive_image(int client_id);
 };

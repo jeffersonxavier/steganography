@@ -15,17 +15,8 @@ public:
 	Steganography(int bits_number, int width, int height, int width_final, int height_final);
 	~Steganography();
 
-	int get_file_size(FILE* file);
-	void load_key();
-	void set_position(int column_block, int byte_position);
-	char transform_to_byte(vector<int> bits);
-	void write_byte(FILE *file, vector<int> bits);
-	void get_bits(char byte);
-	void get_hash_bits(char byte);
-	void get_byte(int column_block, string type);
-	vector<char> generate_md5();
-	bool compare_hashs();
 	bool extract_image();
+	static int get_file_size(FILE* file);
 
 private:
 	int m_bits_number;
@@ -46,4 +37,14 @@ private:
 	vector<int> m_bits;
 	vector<int> m_hash_bits;
 	vector<char> m_hash_found;
+
+	void load_key();
+	void set_position(int column_block, int byte_position);
+	char transform_to_byte(vector<int> bits);
+	void write_byte(FILE *file, vector<int> bits);
+	void get_bits(char byte);
+	void get_hash_bits(char byte);
+	void get_byte(int column_block, string type);
+	vector<char> generate_md5();
+	bool compare_hashs();
 };

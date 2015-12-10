@@ -11,14 +11,15 @@ public:
 	~Connection();
 
 	void client_connection();
-	
-	void send_message(int id, int size, string message);
-	string receive_message(int client_id);
+	void send_image();
 
 private:
 	string server_ip;
 	int server_port;
 	int socket_descriptor;
 
+	void close_connection();
 	int do_connect(struct sockaddr_in* server_addr);
+	void send_message(int id, int size, char* message);
+	string receive_message(int client_id);
 };
