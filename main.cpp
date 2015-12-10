@@ -16,6 +16,7 @@ string key;
 int width = 0, height = 0, width_final = 0, height_final = 0;
 vector<int> bits(CHAR_BIT, 0);
 vector<int> hash_bits;
+vector<char> hash_found;
 FILE *image_file, *out_file, *hash_file;
 
 int get_file_size(FILE* file)
@@ -105,7 +106,9 @@ void get_hash_bits(char byte)
 
 		if (hash_bits.size() == CHAR_BIT)
 		{
-			write_byte(hash_file, hash_bits);
+			char byte = transform_to_byte(hash_bits);
+			hash_found.push_back(byte);
+			bytes++;
 			hash_bits.clear();
 		}
 	}
@@ -137,29 +140,40 @@ void get_byte(int column_block, string type)
 	}
 }
 
-void generate_md5()
+vector<char> generate_md5()
 {
-	unsigned char hash[MD5_DIGEST_LENGTH];
 	FILE *image = fopen ("image.y", "rb");
 
 	if (not image)
 		errx(-1, "Fail in open image!");
 
 	MD5_CTX md5_context;
-    MD5_Init (&md5_context);
+    MD5_Init(&md5_context);
 
     char c = fgetc(image);
     while (c != EOF)
     {
-        MD5_Update (&md5_context, &c, sizeof(c));
+        MD5_Update(&md5_context, &c, sizeof(c));
         c = fgetc(image);
     }
-    MD5_Final (hash, &md5_context);
 
-    for(int i = 0; i < MD5_DIGEST_LENGTH; i++) printf("%02x", hash[i]);
-    printf("\n");
+    char hash_generated[MD5_DIGEST_LENGTH];
+    MD5_Final((unsigned char*) hash_generated, &md5_context);
+    fclose(image);
 
-    fclose (image);
+    vector<char> result;
+    for (int i = 0; i < MD5_DIGEST_LENGTH; ++i)
+    	result.push_back(hash_generated[i]);
+
+    return result;
+}
+
+bool compare_hashs()
+{
+	if (hash_found == generate_md5())
+		return true;
+
+	return false;
 }
 
 int main(int argc, char const *argv[])
@@ -177,9 +191,8 @@ int main(int argc, char const *argv[])
 
 	image_file = fopen("image.y", "r+b");
 	out_file = fopen("out.y", "w+");
-	hash_file = fopen("hash.txt", "w+");
 
-	if (not image_file or not out_file or not hash_file)
+	if (not image_file or not out_file)
 		errx(-1, "Fail in open files!");
 
 	//get steganography image
@@ -207,7 +220,7 @@ int main(int argc, char const *argv[])
 	fclose(image_file);
 	fclose(out_file);
 
-	generate_md5();
+	printf("result %d\n", compare_hashs());
 
 	return 0;
 }
