@@ -25,4 +25,5 @@ private:
 
 	int do_connect(struct sockaddr_in* server_addr);
 	void receive_image(int client_id);
+	void send_confirmation(int id);
 };

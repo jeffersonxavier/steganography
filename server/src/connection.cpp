@@ -89,15 +89,27 @@ Connection::receive_image(int id)
 
 	if (recv(id, message, size, 0) <= 0)
 		printf("Fail in receive message from client %s\n", client_ip.c_str());
+	else
+	{
+		printf("Message received with %d bytes\n", size);
+		send_confirmation(id);
 
-	printf("Message received with %d bytes\n", size);
+		FILE *out_file = fopen("out.y", "a+");
+		if (not out_file)
+			errx(-1, "Error in open out file!");
 
-	FILE *out_file = fopen("out.y", "a+");
-	if (not out_file)
-		errx(-1, "Error in open out file!");
-
-	fwrite(message, sizeof(char), size, out_file);
-	fclose(out_file);
+		fwrite(message, sizeof(char), size, out_file);
+		fclose(out_file);
+	}
 	
 	free(message);
+}
+
+void
+Connection::send_confirmation(int id)
+{
+	unsigned char confirmation = 0x01;
+
+	if (send(id, &confirmation, sizeof(confirmation), 0) < 0)
+		printf("Error in send confirmation!\n");
 }

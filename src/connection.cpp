@@ -36,7 +36,10 @@ Connection::send_image()
 	while ((bytes = fread(buffer, sizeof(char), SIZE_TO_READ, out_file)))
 	{
 		client_connection();
+
 		send_message(socket_descriptor, bytes, buffer);
+		receive_confirmation();
+
 		close_connection();
 	}
 }
@@ -89,20 +92,18 @@ Connection::send_message(int id, int size, char* message)
 }
 
 //Receive server message and return this message
-string
-Connection::receive_message(int id)
+bool
+Connection::receive_confirmation()
 {
-	int size;
-	if (recv(id, &size, sizeof(size), 0) <= 0)
-		errx(-1, "Fail in first recv function!");
+	unsigned char confirmation;
+	if (recv(socket_descriptor, &confirmation, sizeof(confirmation), 0) <= 0)
+	{
+		printf("Fail in first recv function!\n");
+		return false;
+	}
 
-	char* message = (char*) malloc(size);
+	if (confirmation == 0x01)
+		return true;
 
-	if (recv(id, message, size, 0) <= 0)
-		errx(-1, "Fail in second recv function!");
-
-	string result = message;
-	free(message);
-
-	return result;
+	return false;
 }

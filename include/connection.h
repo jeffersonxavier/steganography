@@ -21,5 +21,5 @@ private:
 	void close_connection();
 	int do_connect(struct sockaddr_in* server_addr);
 	void send_message(int id, int size, char* message);
-	string receive_message(int client_id);
+	bool receive_confirmation();
 };
