@@ -94,12 +94,12 @@ Connection::receive_image(int id)
 		printf("Message received with %d bytes\n", size);
 		send_confirmation(id);
 
-		FILE *out_file = fopen("out.y", "a+");
-		if (not out_file)
-			errx(-1, "Error in open out file!");
+		FILE *steg_file = fopen("steg_file.y", "a+");
+		if (not steg_file)
+			errx(-1, "Error in open steg file!");
 
-		fwrite(message, sizeof(char), size, out_file);
-		fclose(out_file);
+		fwrite(message, sizeof(char), size, steg_file);
+		fclose(steg_file);
 	}
 	
 	free(message);

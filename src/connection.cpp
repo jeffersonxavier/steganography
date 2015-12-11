@@ -98,7 +98,7 @@ Connection::receive_confirmation()
 	unsigned char confirmation;
 	if (recv(socket_descriptor, &confirmation, sizeof(confirmation), 0) <= 0)
 	{
-		printf("Fail in first recv function!\n");
+		printf("Fail in receive confirmation!\n");
 		return false;
 	}
 

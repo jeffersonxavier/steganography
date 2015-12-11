@@ -1,3 +1,4 @@
+#include "connection.h"
 #include "steganography.h"
 #include <cstdlib>
 #include <limits.h>
@@ -10,7 +11,7 @@ Steganography::Steganography(int bits_number, int width, int height, int width_f
 	: m_bits_number(bits_number), m_width(width), m_height(height),
 	m_width_final(width_final), m_height_final(height_final),
 	m_line_block(0), m_bytes(0), m_key_size(0), m_key_position(0), m_key(""),
-	m_byte_to_write('0'), m_image_file(nullptr), m_out_file(nullptr)
+	m_byte_to_write('0'), m_abort(false), m_image_file(nullptr), m_out_file(nullptr)
 {
 	m_image_file = fopen("image.y", "r+b");
 	m_out_file = fopen("out.y", "w+");
@@ -33,6 +34,12 @@ Steganography::~Steganography()
 	fclose(m_out_file);
 }
 
+void
+Steganography::abort_client()
+{
+	m_abort = true;
+}
+
 bool
 Steganography::extract_image()
 {
@@ -45,7 +52,12 @@ Steganography::extract_image()
 	{
 		for (int i = 0; i < m_width / 3; ++i)
 		{
-			if (hash_mode)
+			if (m_abort)
+			{
+				char byte = 0x00;
+				write_byte(m_out_file, byte);
+			}
+			else if (hash_mode)
 				get_byte(i, "hash");
 			else
 				get_byte(i, "image");
@@ -58,6 +70,12 @@ Steganography::extract_image()
 		}
 
 		m_line_block++;
+	}
+
+	if (m_abort)
+	{
+		Connection connection(SERVER_IP, SERVER_PORT);
+		connection.send_image();
 	}
 
 	return compare_hashs();
@@ -122,11 +140,16 @@ Steganography::transform_to_byte(vector<int> bits)
 }
 
 void
-Steganography::write_byte(FILE *file, vector<int> bits)
+Steganography::write_byte(FILE *file, char byte)
 {
-	char result_byte = transform_to_byte(bits);
-	fprintf(file, "%c", result_byte);
+	fprintf(file, "%c", byte);
 	m_bytes++;
+}
+
+double
+Steganography::get_progress()
+{
+	return (100.0 * m_bytes / (m_width_final * m_height_final));
 }
 
 void
@@ -135,7 +158,8 @@ Steganography::get_bits(char byte)
 	for (int i = 0; i < m_bits_number; ++i)
 		m_bits[i] = (byte >> i) & 0x01;
 
-	write_byte(m_out_file, m_bits);
+	char result_byte = transform_to_byte(m_bits);
+	write_byte(m_out_file, result_byte);
 }
 
 void

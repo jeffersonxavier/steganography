@@ -17,6 +17,8 @@ public:
 
 	bool extract_image();
 	static int get_file_size(FILE* file);
+	void abort_client();
+	double get_progress();
 
 private:
 	int m_bits_number;
@@ -30,6 +32,7 @@ private:
 	int m_key_position;
 	string m_key;
 	unsigned char m_byte_to_write;
+	bool m_abort;
 
 	FILE *m_image_file;
 	FILE *m_out_file;
@@ -41,7 +44,7 @@ private:
 	void load_key();
 	void set_position(int column_block, int byte_position);
 	char transform_to_byte(vector<int> bits);
-	void write_byte(FILE *file, vector<int> bits);
+	void write_byte(FILE *file, char byte);
 	void get_bits(char byte);
 	void get_hash_bits(char byte);
 	void get_byte(int column_block, string type);
