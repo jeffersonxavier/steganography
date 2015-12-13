@@ -29,7 +29,24 @@
 
 \section{Introdução}
 
+A esteganografia é a arte de ocultar informações. Inclui métodos que buscam adicionar ou alterar bits em um dado arquivo buscando a melhor forma de impedir sua detecção, esses bits representam uma infromação escondida\footnote{\url{http://www.ic.unicamp.br/\~rocha/pub/papers/segurancaInternetEsteganografia.pdf}}.
+
+Uma grande aplicação da esteganografia está nas marcas d'água em imagens. Pois dá-se na substituição de bits em uma imagem de tal forma que esse efeito é gerado\footnote{\url{https://www.researchgate.net/profile/Hae_Kim2/publication/220162186_Marcas_d\%27gua_Frgeis_de_Autenticao_para_Imagens_em_Tonalidade_Contnua_e_Esteganografia_para_Imagens_Binrias_e_Meio-Tom/links/00463516819b9aa6ff000000.pdf}}.
+
+Este trabalho consiste na análise de arquivos de vídeo com conteúdo esteganografado buscando extrair esse conteúdo. O arquivo original onde se aplica a esteganografia foi separado em blocos de pixels de tamanho 3x3. Onde cada um dos blocos poderá possuir um ou nenhum pixel que tenha sido esteganografado.
+
+Para a extração da imagem esteganografada baseia-se em uma chave que indica qual pixel do bloco atual foi alterado, ou informa que nenhum pixel no bloco foi alterado quando se tem o número zero na chave. Por fim, ao se extrair toda a imagem ainda se têm 128 bits de informação esteganografada que representam o hash md5 do arquivo inicial.
+
+Além do trabalho relacionado a parte de esteganografia ainda foi feito um sistema cliente/servidor com sockets para envio da imagem extraída para um servidor específico. A seguir será apresentada toda a especificação deste trabalho e como foi feita toda a sua implementação.
+
 \section{Especificação}
+
+\begin{itemize}
+	\item \textbf{Extrair imagem esteganografada:} A partir de uma arquivo de chave contendo apenas números de zero a nove deve-se extrair a imagem esteganografada. Estes números represental qual pixel no bloco foi alterado e vem ser pegados uma quantidade específica de bits menos significativos desse pixel. A chave passada é circular, ou seja, ao se chegar ao final volta-se a primeira posição e pode-se continuar o processo de extração. Isso é feito até que sejam extraídos todos os pixels da imagem escondida. Cada sequência de bits que é extraída deve ser completada com zeros bucando ter-se uma quantidade de oito bits para se formar um byte.
+	\item \textbf{Extrair hash md5:} Ao se extrair toda a imagem escondida o processo de extração continua para a extração do hash. Nesse processo os bits que são estraídos devem ser concatenados até se alcançar 128 bits. Nessa etapa os bits que são estraídos devem ser substituídos com zeros no arquivo principal.
+	\item \textbf{Comparar hashs:} Com as duas etapas anteriores completas têm-se a imagem extraída e o hash do arquivo principal, a partir disso deve-se gerar o hash do arquivo principal e uma comparação desse hash gerado com o hash extraído deve ser feita, garantindo assim a integridade do arquivo recebido.
+	\item \textbf{Enviar imagem extraída:} Se a comparação dos hashs retornar um valor verdadeiro deve-se enviar a imagem extraída para um servidor, esse envio é feito com utilização de sockets.
+\end{itemize}
 
 \section{Implementação e Prototipação}
 
