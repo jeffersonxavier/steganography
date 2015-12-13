@@ -1,0 +1,46 @@
+\documentclass[journal,transmag]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\begin{document}
+
+\title{Esteganografia\\ Sistemas Embarcados}
+
+\author{\IEEEauthorblockN{Jefferson Nunes de Sousa Xavier}}
+
+\markboth{Sistemas Embarcados,~Vol.~1, No.~2, Dezembro~2015}{}
+
+\maketitle
+
+\section{Objetivos}
+
+\textbf{Objetivo Geral:} Criar um sistema cliente/servidor capaz de analizar arquivos de vídeos e extrair imagens econdidas com estaganografia.
+\\
+
+\textbf{Objetivos Específicos:}
+\begin{itemize}
+	\item Extrair imagem estaganografada;
+	\item Extrair hash e comparar com o arquivo recebido;
+	\item Enviar imagem extraída para um servidor;
+\end{itemize}
+
+\section{Introdução}
+
+\section{Especificação}
+
+\section{Implementação e Prototipação}
+
+\section{Conclusão}
+
+Este trabalho trouxe a aplicação prática de um dos conceitos estudados na disciplina de Sistemas Embarcados. Esse conceito foi explorado na estração de imagens escondidas em arquivos de vídeos, esta esteganografia foi aplicada usando-se blocos 3x3 de pixels em que um ou nenhum pixel foi esteganografado de acordo com uma chave específica. A partir dessa chave pode-se analisar o arquivo e extrair as imagens esteganografadas.
+
+Além da imagem estraiu-se também um hash de criptografia md5 do arquivo enviado que também estava esteganografado, este hash pode comprovar que o arquivo recebido não foi alterado.
+
+Foram utilizados sockets também no sistema cliente servidor para envio das imagens extraídas.
+
+Todo o código dos sistemas desenvolvidos pode ser encontrado em: \url{https://github.com/jeffersonxavier/steganography}.
+
+\end{document}

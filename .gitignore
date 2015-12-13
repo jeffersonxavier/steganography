@@ -32,3 +32,10 @@
 *.y
 steganography
 server
+
+
+# Latex
+*.aux
+*.log
+*.out
+*.pdf
